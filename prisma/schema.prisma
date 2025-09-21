@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// model User {
+//   id             Int      @id @default(autoincrement())
+//   email          String   @unique
+//   fullName       String
+//   masterPassword String
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @updatedAt
+
+//   passwords Password[]
+//   logs      SecurityLog[]
+// }
+
+// model Password {
+//   id          Int      @id @default(autoincrement())
+//   serviceName String
+//   username    String
+//   passwordEnc String
+//   notes       String?
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   user        User      @relation(fields: [userId], references: [id])
+//   userId      Int
+//   algorithm   Algorithm @relation(fields: [algorithmId], references: [id])
+//   algorithmId Int
+// }
+
+// model Algorithm {
+//   id          Int      @id @default(autoincrement())
+//   name        String // Ej. AES-256, RSA-2048, SHA-256
+//   type        AlgoType
+//   description String?
+//   createdAt   DateTime @default(now())
+
+//   passwords Password[]
+// }
+
+// model SecurityLog {
+//   id        Int      @id @default(autoincrement())
+//   action    String
+//   ip        String?
+//   user      User     @relation(fields: [userId], references: [id])
+//   userId    Int
+//   createdAt DateTime @default(now())
+// }
+
+// enum AlgoType {
+//   SIMETRICO
+//   ASIMETRICO
+//   HASH
+// }
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  password        String    // Contraseña maestra (hash seguro)
+  salt            String    // Salt único para derivar la Master Key
+  kdfIterations   Int       @default(600000)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  vaultItems      VaultItem[]
+}
+
+model VaultItem {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  user           User      @relation(fields: [userId], references: [id])
+  serviceName    String    // Ej. "Gmail"
+  username       String
+  cipherText     String    // Contraseña cifrada con AES-256-GCM
+  notesCipher    String?   // Notas opcionales cifradas
+  algorithm      String    @default("AES-256-GCM")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
