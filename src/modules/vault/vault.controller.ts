@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Param, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  Query,
+  Delete,
+} from '@nestjs/common';
 import { VaultService } from './vault.service';
 
 @Controller('vault')
@@ -21,7 +29,15 @@ export class VaultController {
   }
 
   @Get(':userId')
-  async listVaultItems(@Param('userId') userId: number) {
-    return this.vaultService.getVaultItems(userId);
+  async listVaultItems(
+    @Param('userId') userId: number,
+    @Query('algorithm') algorithm: string,
+  ) {
+    return this.vaultService.getVaultItems(userId, algorithm);
+  }
+
+  @Delete(':userId')
+  async delete(@Param('userId') userId: number) {
+    return this.vaultService.delete(userId);
   }
 }
